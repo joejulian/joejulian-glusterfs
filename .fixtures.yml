@@ -1,0 +1,4 @@
+fixtures:
+  repositories:
+    'yum': 'https://github.com/joejulian/joejulian-yum.git'
+    'logstash': 'https://github.com/joejulian/joejulian-logstash.git'

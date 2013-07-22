@@ -1,0 +1,92 @@
+glusterfs
+
+WARNING: This module is incomplete and does not yet work.
+
+This module is used for dynamic management of GlusterFS
+
+Usage
+-----
+
+Create a trusted peer group:
+
+For each server node, export a glusterfs_peer and realize all the
+exported peers *except this one*. Use tags for creating multiple
+groups.
+
+IMPORTANT: Do not realize a node's own glusterfs_peer.
+
+.Configure Host for GlusterFS
+----
+include glusterfs
+----
+.Define Peer
+[NOTE] "tag" is optional and is used to allow the creation of multiple
+peer groups.
+----
+@@glusterfs_peer { $fqdn: tag => 'peergroup1' }
+Glusterfs_peer <<| (tag == 'peergroup1') and (title != $fqdn)  |>>
+----
+
+.Define Bricks
+----
+glusterfs::brick { '/data/gluster/myvol/a/brick': host => $fqdn, tag => 'myvol1' }
+glusterfs::brick { '/data/gluster/myvol/b/brick': host => $fqdn, tag => 'myvol1' }
+glusterfs::brick { '/data/gluster/myvol/c/brick': host => $fqdn, tag => 'myvol1' }
+glusterfs::brick { '/data/gluster/myvol/d/brick': host => $fqdn, tag => 'myvol1' }
+----
+
+.Define Volume
+----
+glusterfs::volume { 'myvol1':
+  bricktag => 'myvol1',
+  settings => { 'nfs.disable' => 'on' }
+}
+----
+
+Or with a hiera configuration
+
+.In a yaml configuration file
+----
+glusterfs::peergroup: 'peergroup1'
+glusterfs_peer::$fqdn: tag => $glusterfs::peergroup
+glusterfs::brick::brick_a::path: '/data/gluster/myvol/a/brick'
+glusterfs::brick::brick_a::host: $fqdn
+glusterfs::brick::brick_a::tag: 'myvol1'
+glusterfs::brick::brick_b::path: '/data/gluster/myvol/a/brick'
+glusterfs::brick::brick_b::host: $fqdn
+glusterfs::brick::brick_b::tag: 'myvol1'
+glusterfs::brick::brick_c::path: '/data/gluster/myvol/a/brick'
+glusterfs::brick::brick_c::host: $fqdn
+glusterfs::brick::brick_c::tag: 'myvol1'
+glusterfs::brick::brick_d::path: '/data/gluster/myvol/a/brick'
+glusterfs::brick::brick_d::host: $fqdn
+glusterfs::brick::brick_d::tag: 'myvol1'
+glusterfs::volume::myvol1::bricktag: 'myvol1'
+glusterfs::volume::myvol1::settings:
+  'nfs.disable': 'on'
+----
+
+.In your manifest
+----
+include glusterfs
+glusterfs::peer { $fqdn: }
+glusterfs::brick { 'brick_a': }
+glusterfs::brick { 'brick_b': }
+glusterfs::brick { 'brick_c': }
+glusterfs::brick { 'brick_d': }
+glusterfs::volume { 'myvol1': }
+----
+
+License
+-------
+
+
+Contact
+-------
+
+
+Support
+-------
+
+Please log tickets and issues on 
+[github](http://github.com/joejulian/joejulian-glusterfs)
